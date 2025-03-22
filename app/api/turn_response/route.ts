@@ -9,12 +9,25 @@ export async function POST(request: Request) {
 
     const openai = new OpenAI();
 
+    const outputSchema = {
+        type: "object",
+        properties: {
+            yearBuilt: { type: "number" },
+            sourceURL: { type: "string" },
+            confidenceScore: {type: "number"},
+        },
+        required: ["yearBuilt", "sourceURL", "confidenceScore"],
+        additionalProperties: false,
+    };
+
+
     const events = await openai.responses.create({
       model: MODEL,
       input: messages,
       tools,
       stream: true,
       parallel_tool_calls: false,
+      text: { format: { name: "year_built_extraction", type: "json_schema", "strict": true, "schema": outputSchema } }
     });
 
     // Create a ReadableStream that emits SSE data
